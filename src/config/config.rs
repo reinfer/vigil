@@ -38,6 +38,9 @@ pub struct ConfigServer {
     pub workers: u16,
 
     pub reporter_token: String,
+
+    #[serde(default = "Default::default")]
+    pub danger_accept_invalid_certificates: bool,
 }
 
 #[derive(Deserialize)]

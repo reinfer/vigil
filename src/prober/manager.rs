@@ -42,6 +42,7 @@ lazy_static! {
     }));
     static ref PROBE_HTTP_CLIENT: Client = Client::builder()
         .timeout(Duration::from_secs(APP_CONF.metrics.poll_delay_dead))
+        .danger_accept_invalid_certs(APP_CONF.server.danger_accept_invalid_certificates)
         .gzip(false)
         .redirect(RedirectPolicy::none())
         .default_headers(make_default_headers())
