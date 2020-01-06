@@ -7,8 +7,10 @@
 use std::env;
 use std::net::SocketAddr;
 use std::path::PathBuf;
+use std::str::FromStr;
 
 use serde::de::{Deserialize as _, Deserializer, Error as _};
+use url::Url;
 use url_serde::SerdeUrl;
 
 use super::defaults;
@@ -158,7 +160,11 @@ pub struct ConfigNotifyTwilio {
 
 #[derive(Deserialize)]
 pub struct ConfigNotifySlack {
-    pub hook_url: SerdeUrl,
+    #[serde(
+        rename = "hook_url_env_var",
+        deserialize_with = "deserialize_url_env_var"
+    )]
+    pub hook_url: Url,
 
     #[serde(default = "defaults::notify_slack_mention_channel")]
     pub mention_channel: bool,
@@ -215,6 +221,11 @@ fn deserialize_env_var<'de, D: Deserializer<'de>>(deserializer: D) -> Result<Str
                 }
             })
     })
+}
+
+fn deserialize_url_env_var<'de, D: Deserializer<'de>>(deserializer: D) -> Result<Url, D::Error> {
+    deserialize_env_var(deserializer)
+        .and_then(|env| Url::from_str(&env).map_err(|error| D::Error::custom(error.to_string())))
 }
 
 fn deserialize_opt_env_var<'de, D: Deserializer<'de>>(
